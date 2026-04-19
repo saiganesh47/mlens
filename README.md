@@ -1,7 +1,7 @@
 # 🔬 MLens — Explainable ML Audit Tool
 
 <p align="center">
-  <img src="docs/assets/mlens_banner.png" alt="MLens Banner" width="800"/>
+  <img src="MLens — Explainable ML Audit Tool.png" alt="MLens Banner" width="800"/>
 </p>
 
 <p align="center">
@@ -119,14 +119,15 @@ python examples/quickstart.py
 ## 🖼️ Visuals
 
 <p align="center">
-  <img src="docs/assets/shap_summary.png" width="48%" alt="SHAP Summary Plot"/>
+  <img src="shap_summary.png" width="48%" alt="SHAP Summary Plot"/>
   &nbsp;
-  <img src="docs/assets/fairness_dashboard.png" width="48%" alt="Fairness Dashboard"/>
+  <img src="fairness_dashboard.png" width="48%" alt="Fairness Dashboard"/>
 </p>
+
 <p align="center">
-  <img src="docs/assets/drift_heatmap.png" width="48%" alt="Drift Heatmap"/>
+  <img src="drift_heatmap.png" width="48%" alt="Drift Heatmap"/>
   &nbsp;
-  <img src="docs/assets/audit_report_preview.png" width="48%" alt="Full Audit Report"/>
+  <img src="audit_report_preview.png" width="48%" alt="Full Audit Report"/>
 </p>
 
 ---
