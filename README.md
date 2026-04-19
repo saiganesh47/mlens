@@ -2,6 +2,7 @@
 
 <p align="center">
   <img src="MLens — Explainable ML Audit Tool.png" alt="MLens Banner" width="800"/>
+  <video src="docsassetsdemo.mp4" controls width="100%"></video>
 </p>
 
 <p align="center">
