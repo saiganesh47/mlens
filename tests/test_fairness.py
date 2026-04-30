@@ -1,110 +1,108 @@
 """
-tests/test_auditor.py
-======================
-Unit tests for the ModelAuditor orchestrator.
+tests/test_fairness.py
+=======================
+Unit tests for FairnessEvaluator and FairnessResult.
 """
 
 import numpy as np
 import pytest
-from sklearn.datasets import make_classification
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
 
-from mlens.auditor import AuditReport, ModelAuditor
+from mlens.fairness.fairness_metrics import FairnessEvaluator, FairnessResult
 
 
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
-@pytest.fixture(scope="module")
-def classification_data():
-    X, y = make_classification(
-        n_samples=500, n_features=10, n_informative=6,
-        random_state=42,
-    )
-    return train_test_split(X, y, test_size=0.2, random_state=42)
+@pytest.fixture
+def biased_data():
+    """Synthetic data with clear demographic parity violation."""
+    np.random.seed(42)
+    n = 400
+    y_true = np.random.randint(0, 2, n)
+    y_pred = y_true.copy()
+    sensitive = np.array(["A"] * 200 + ["B"] * 200)
+    # Introduce bias: flip 40% of group B predictions
+    flip_idx = np.where(sensitive == "B")[0][:80]
+    y_pred[flip_idx] = 1 - y_pred[flip_idx]
+    return y_true, y_pred, sensitive
 
 
-@pytest.fixture(scope="module")
-def trained_rf(classification_data):
-    X_train, _, y_train, _ = classification_data
-    model = RandomForestClassifier(n_estimators=20, random_state=42)
-    model.fit(X_train, y_train)
-    return model
-
-
-@pytest.fixture(scope="module")
-def auditor(trained_rf, classification_data):
-    X_train, X_test, y_train, y_test = classification_data
-    sensitive = np.random.choice(["A", "B"], size=len(y_test), replace=True)
-    return ModelAuditor(
-        model=trained_rf,
-        X_train=X_train,
-        X_test=X_test,
-        y_test=y_test,
-        sensitive_features=sensitive,
-        model_name="TestRF",
-        shap_background_samples=50,
-    )
+@pytest.fixture
+def fair_data():
+    """Synthetic data with no demographic parity violation."""
+    np.random.seed(0)
+    n = 400
+    y_true = np.random.randint(0, 2, n)
+    y_pred = y_true.copy()
+    sensitive = np.array(["A"] * 200 + ["B"] * 200)
+    return y_true, y_pred, sensitive
 
 
 # ── Tests ──────────────────────────────────────────────────────────────────
 
-class TestModelAuditor:
+class TestFairnessEvaluator:
 
-    def test_run_returns_audit_report(self, auditor):
-        report = auditor.run()
-        assert isinstance(report, AuditReport)
+    def test_returns_fairness_result(self, biased_data):
+        y_true, y_pred, sensitive = biased_data
+        ev = FairnessEvaluator(y_true, y_pred, sensitive)
+        result = ev.evaluate()
+        assert isinstance(result, FairnessResult)
 
-    def test_report_has_model_name(self, auditor):
-        report = auditor.run()
-        assert report.model_name == "TestRF"
+    def test_biased_data_flags(self, biased_data):
+        y_true, y_pred, sensitive = biased_data
+        ev = FairnessEvaluator(y_true, y_pred, sensitive)
+        result = ev.evaluate()
+        assert len(result.flags) > 0
 
-    def test_report_runtime_positive(self, auditor):
-        report = auditor.run()
-        assert report.runtime_seconds > 0
+    def test_fair_data_no_flags(self, fair_data):
+        y_true, y_pred, sensitive = fair_data
+        ev = FairnessEvaluator(y_true, y_pred, sensitive)
+        result = ev.evaluate()
+        assert result.is_fair
 
-    def test_report_has_shap_result(self, auditor):
-        report = auditor.run()
-        assert report.shap_result is not None
+    def test_dp_gap_range(self, biased_data):
+        y_true, y_pred, sensitive = biased_data
+        ev = FairnessEvaluator(y_true, y_pred, sensitive)
+        result = ev.evaluate()
+        assert 0.0 <= result.demographic_parity_gap <= 1.0
 
-    def test_report_has_fairness_result(self, auditor):
-        report = auditor.run()
-        assert report.fairness_result is not None
+    def test_disparate_impact_range(self, biased_data):
+        y_true, y_pred, sensitive = biased_data
+        ev = FairnessEvaluator(y_true, y_pred, sensitive)
+        result = ev.evaluate()
+        assert 0.0 <= result.disparate_impact <= 1.0
 
-    def test_report_has_drift_result(self, auditor):
-        report = auditor.run()
-        assert report.drift_result is not None
+    def test_per_group_metrics_not_empty(self, biased_data):
+        y_true, y_pred, sensitive = biased_data
+        ev = FairnessEvaluator(y_true, y_pred, sensitive)
+        result = ev.evaluate()
+        assert len(result.per_group_metrics) == 2  # groups A and B
 
-    def test_summary_lines_not_empty(self, auditor):
-        report = auditor.run()
-        assert len(report.summary_lines) > 0
+    def test_per_group_has_required_keys(self, biased_data):
+        y_true, y_pred, sensitive = biased_data
+        ev = FairnessEvaluator(y_true, y_pred, sensitive)
+        result = ev.evaluate()
+        required = {"group", "accuracy", "precision", "recall", "f1"}
+        for row in result.per_group_metrics:
+            assert required.issubset(set(row.keys()))
 
-    def test_to_dict_serialisable(self, auditor):
-        import json
-        report = auditor.run()
-        d = report.to_dict()
-        assert json.dumps(d)  # must not raise
+    def test_to_dict_keys(self, biased_data):
+        y_true, y_pred, sensitive = biased_data
+        ev = FairnessEvaluator(y_true, y_pred, sensitive)
+        d  = ev.evaluate().to_dict()
+        assert "demographic_parity_gap" in d
+        assert "equalized_odds_gap"     in d
+        assert "disparate_impact"       in d
+        assert "flags"                  in d
 
-    def test_skip_shap(self, trained_rf, classification_data):
-        X_train, X_test, _, y_test = classification_data
-        auditor = ModelAuditor(
-            model=trained_rf, X_train=X_train, X_test=X_test,
-            y_test=y_test, run_shap=False,
-        )
-        report = auditor.run()
-        assert report.shap_result is None
-
-    def test_skip_drift(self, trained_rf, classification_data):
-        X_train, X_test, _, y_test = classification_data
-        auditor = ModelAuditor(
-            model=trained_rf, X_train=X_train, X_test=X_test,
-            y_test=y_test, run_drift=False,
-        )
-        report = auditor.run()
-        assert report.drift_result is None
-
-    def test_metadata_keys(self, auditor):
-        report = auditor.run()
-        assert "train_size"  in report.metadata
-        assert "test_size"   in report.metadata
-        assert "n_features"  in report.metadata
+    def test_custom_thresholds(self, biased_data):
+        """Stricter thresholds should generate more flags."""
+        y_true, y_pred, sensitive = biased_data
+        strict = FairnessEvaluator(y_true, y_pred, sensitive,
+                                   dp_threshold=0.01,
+                                   eo_threshold=0.01,
+                                   di_threshold=0.99)
+        lenient = FairnessEvaluator(y_true, y_pred, sensitive,
+                                    dp_threshold=0.99,
+                                    eo_threshold=0.99,
+                                    di_threshold=0.01)
+        assert len(strict.evaluate().flags) >= len(lenient.evaluate().flags)
