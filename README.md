@@ -158,7 +158,49 @@ mlens/
 ├── requirements.txt
 └── README.md
 ```
-
+## 📁 Project Structure
+```
+mlens/
+│
+├── mlens/                            ← Core package
+│   ├── __init__.py                   ✅ v0.1.0
+│   ├── auditor.py                    ✅ v0.1.0
+│   ├── explainability/
+│   │   └── shap_analyzer.py          ✅ v0.1.0
+│   ├── fairness/
+│   │   └── fairness_metrics.py       ✅ v0.1.0
+│   ├── drift/
+│   │   └── drift_detector.py         ✅ v0.1.0
+│   ├── report/
+│   │   ├── __init__.py               🆕 v0.2.0
+│   │   ├── html_generator.py         🆕 v0.2.0
+│   │   ├── pdf_generator.py          🆕 v0.2.0
+│   │   └── templates/
+│   │       └── report.html.j2        🆕 v0.2.0
+│   └── cli/
+│       ├── __init__.py               🆕 v0.2.0
+│       └── main.py                   🆕 v0.2.0
+│
+├── dashboard/
+│   └── app.py                        🆕 v0.2.0 (Streamlit)
+│
+├── examples/
+│   └── quickstart.py                 ✅ v0.1.0
+│
+├── tests/
+│   ├── test_auditor.py               🆕 v0.2.0
+│   ├── test_fairness.py              🆕 v0.2.0
+│   └── test_drift.py                 🆕 v0.2.0
+│
+├── docs/
+│   └── assets/                       ✅ v0.1.0 (4 charts + banner)
+│
+├── README.md                         ✅ v0.1.0
+├── CONTRIBUTING.md                   ✅ v0.1.0
+├── setup.py                          🆕 v0.2.0
+├── requirements.txt                  🆕 v0.2.0 (updated)
+└── .github/workflows/ci.yml          ✅ v0.1.0
+```
 ---
 
 ## 🧪 Running Tests
