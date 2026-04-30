@@ -208,7 +208,6 @@ mlens/
 ```bash
 pytest tests/ -v --cov=mlens --cov-report=term-missing
 ```
-
 ---
 
 ## 🗺️ Roadmap
