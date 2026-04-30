@@ -10,6 +10,7 @@
   <a href="https://pypi.org/project/mlens/"><img src="https://img.shields.io/pypi/v/mlens.svg" alt="PyPI"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
   <a href="https://python.org"><img src="https://img.shields.io/badge/python-3.9%2B-blue.svg" alt="Python 3.9+"></a>
+  <img src="https://img.shields.io/badge/version-0.2.0-7F77DD.svg" alt="Version"/>
 </p>
 
 > **Drop in any trained ML model. Get a full audit report — explainability, fairness, drift — in seconds.**
