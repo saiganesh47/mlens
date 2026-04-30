@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MLens Audit Report — GBT-AdultIncome</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:#1a1a2e;color:#e8e8e8;
+    font-family:'Segoe UI',system-ui,sans-serif;
+    padding:2rem;max-width:1100px;margin:0 auto;font-size:14px;
+  }
+  /* Header */
+  .hdr{border-bottom:2px solid #534AB7;padding-bottom:1.2rem;margin-bottom:1.5rem}
+  .hdr h1{font-size:22px;font-weight:500;color:#7F77DD;margin-bottom:6px}
+  .hdr p{font-size:12px;color:#aaaaaa}
+  .badge{display:inline-block;padding:3px 12px;border-radius:20px;
+         font-size:11px;font-weight:600;margin-left:10px;vertical-align:middle}
+  .b-warn{background:rgba(226,75,74,0.15);color:#E24B4A}
+  .b-ok{background:rgba(99,153,34,0.15);color:#639922}
+  /* Meta */
+  .meta-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+  .mc{background:#16213e;border:1px solid #333355;border-radius:10px;padding:12px 14px}
+  .mc-l{font-size:11px;color:#aaaaaa;margin-bottom:3px}
+  .mc-v{font-size:20px;font-weight:500}
+  /* Section */
+  .sec{background:#16213e;border:1px solid #333355;border-radius:12px;
+       padding:1.5rem;margin-bottom:1.5rem}
+  .sec-h{font-size:14px;font-weight:500;color:#7F77DD;margin-bottom:12px;
+         padding-bottom:8px;border-bottom:1px solid #333355}
+  /* Summary lines */
+  .sl{padding:8px 12px;border-radius:0 6px 6px 0;margin-bottom:6px;font-size:12px}
+  .sl-ok{border-left:3px solid #639922;background:rgba(99,153,34,0.08);color:#8bc34a}
+  .sl-warn{border-left:3px solid #E24B4A;background:rgba(226,75,74,0.08);color:#ef9a9a}
+  /* KPI */
+  .kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
+  .kc{background:#1a1a2e;border:1px solid #333355;border-radius:8px;
+      padding:12px;text-align:center}
+  .kc-l{font-size:11px;color:#aaaaaa;margin-bottom:4px}
+  .kc-v{font-size:22px;font-weight:500}
+  .kc-s{font-size:10px;color:#aaaaaa;margin-top:3px}
+  .kc-warn{color:#E24B4A}.kc-ok{color:#639922}
+  /* Flag */
+  .fl{background:rgba(226,75,74,0.07);border-left:3px solid #E24B4A;
+      border-radius:0 6px 6px 0;padding:8px 12px;margin-top:8px;
+      font-size:11px;color:#ef9a9a}
+  /* Table */
+  table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
+  th{background:#534AB7;color:#fff;padding:8px 10px;text-align:left;font-weight:500}
+  tr:nth-child(even) td{background:rgba(255,255,255,0.03)}
+  td{padding:7px 10px;border-bottom:1px solid #333355;color:#aaaaaa}
+  .td-ok{color:#639922;font-weight:600}.td-warn{color:#E24B4A;font-weight:600}
+  /* Legend */
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;
+          color:#aaaaaa;margin-bottom:10px}
+  .lsq{width:10px;height:10px;border-radius:2px;display:inline-block;
+       margin-right:4px;vertical-align:middle}
+  /* Charts */
+  .chart-wrap{position:relative;width:100%}
+  footer{text-align:center;color:#aaaaaa;font-size:11px;margin-top:2rem;
+         padding-top:1rem;border-top:1px solid #333355}
+  footer a{color:#7F77DD;text-decoration:none}
+  @media(max-width:700px){
+    .meta-row{grid-template-columns:repeat(2,1fr)}
+    .kpi-row{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="hdr">
+  <h1>&#128302; MLens Audit Report
+    <span class="badge b-warn">&#9888; 2 Issues Found</span>
+  </h1>
+  <p>Model: <strong>GBT-AdultIncome</strong> &nbsp;|&nbsp;
+     2026-04-16T09:14:22Z &nbsp;|&nbsp; Runtime: 4.31s &nbsp;|&nbsp;
+     github.com/saiganesh47/mlens</p>
+</div>
+
+<!-- Metadata -->
+<div class="meta-row">
+  <div class="mc"><div class="mc-l">Model</div>
+    <div class="mc-v" style="font-size:13px;">GBT-AdultIncome</div></div>
+  <div class="mc"><div class="mc-l">Train size</div><div class="mc-v">39,073</div></div>
+  <div class="mc"><div class="mc-l">Test size</div><div class="mc-v">9,769</div></div>
+  <div class="mc"><div class="mc-l">Features</div><div class="mc-v">10</div></div>
+</div>
+
+<!-- Summary -->
+<div class="sec">
+  <div class="sec-h">&#128203; Executive Summary</div>
+  <div class="sl sl-ok">&#10003; Top 3 predictive features: age, capital-gain, hours-per-week.</div>
+  <div class="sl sl-warn">&#9888; Demographic parity gap 0.142 exceeds threshold 0.10 — review for potential bias.</div>
+  <div class="sl sl-warn">&#9888; Data drift detected in 2 feature(s): age, capital-gain (PSI &gt; 0.25).</div>
+</div>
+
+<!-- SHAP -->
+<div class="sec">
+  <div class="sec-h">&#129504; SHAP Feature Importance</div>
+  <div class="legend">
+    <span><span class="lsq" style="background:#534AB7"></span>High (&ge;0.15)</span>
+    <span><span class="lsq" style="background:#7F77DD"></span>Medium (&ge;0.09)</span>
+    <span><span class="lsq" style="background:#AFA9EC"></span>Low (&ge;0.05)</span>
+    <span><span class="lsq" style="background:#CECBF6"></span>Minimal (&lt;0.05)</span>
+  </div>
+  <div class="chart-wrap" style="height:320px;">
+    <canvas id="shapChart"></canvas>
+  </div>
+</div>
+
+<!-- Fairness -->
+<div class="sec">
+  <div class="sec-h">&#9878;&#65039; Fairness Evaluation
+    <span style="font-size:11px;font-weight:400;color:#aaaaaa;">
+      &nbsp;Sensitive feature: gender
+    </span>
+  </div>
+  <div class="kpi-row">
+    <div class="kc">
+      <div class="kc-l">Demographic parity gap</div>
+      <div class="kc-v kc-warn">0.1420</div>
+      <div class="kc-s">&#9888; exceeds threshold 0.10</div>
+    </div>
+    <div class="kc">
+      <div class="kc-l">Equalized odds gap</div>
+      <div class="kc-v kc-ok">0.0810</div>
+      <div class="kc-s">&#10003; within threshold</div>
+    </div>
+    <div class="kc">
+      <div class="kc-l">Disparate impact</div>
+      <div class="kc-v kc-warn">0.7400</div>
+      <div class="kc-s">&#9888; below EEOC 4/5ths (0.80)</div>
+    </div>
+  </div>
+  <div class="fl">&#9888; Demographic parity gap 0.142 exceeds threshold 0.10.
+    Model selects positive outcomes at different rates across gender groups.</div>
+  <div class="fl">&#9888; Disparate impact ratio 0.74 is below EEOC 4/5ths threshold 0.80.
+    May indicate adverse impact on a protected group.</div>
+  <div class="legend" style="margin-top:14px;margin-bottom:8px;">
+    <span><span class="lsq" style="background:#534AB7"></span>Male</span>
+    <span><span class="lsq" style="background:#1D9E75"></span>Female</span>
+  </div>
+  <div class="chart-wrap" style="height:220px;">
+    <canvas id="fairChart"></canvas>
+  </div>
+  <table>
+    <tr><th>Group</th><th>Accuracy</th><th>Precision</th>
+        <th>Recall</th><th>F1</th><th>Selection Rate</th><th>FPR</th></tr>
+    <tr><td>Male</td><td>0.8700</td><td>0.8200</td>
+        <td>0.7900</td><td>0.8050</td><td>0.3800</td><td>0.0820</td></tr>
+    <tr><td>Female</td><td>0.8100</td><td>0.7000</td>
+        <td>0.6500</td><td>0.6740</td><td>0.2400</td><td>0.0610</td></tr>
+  </table>
+</div>
+
+<!-- Drift -->
+<div class="sec">
+  <div class="sec-h">&#128202; Drift Detection
+    <span style="font-size:11px;font-weight:400;color:#E24B4A;">
+      &nbsp;Overall: SIGNIFICANT
+    </span>
+  </div>
+  <div class="legend">
+    <span><span class="lsq" style="background:#639922"></span>Stable (PSI &lt; 0.10)</span>
+    <span><span class="lsq" style="background:#EF9F27"></span>Moderate (0.10 – 0.25)</span>
+    <span><span class="lsq" style="background:#E24B4A"></span>Significant (&gt; 0.25)</span>
+  </div>
+  <div class="chart-wrap" style="height:250px;">
+    <canvas id="driftChart"></canvas>
+  </div>
+  <table>
+    <tr><th>Feature</th><th>PSI</th><th>PSI Status</th>
+        <th>KS Statistic</th><th>KS p-value</th><th>Drifted</th></tr>
+    <tr><td>age</td><td>0.3100</td>
+        <td class="td-warn">significant</td><td>0.0410</td><td>0.0380</td>
+        <td class="td-warn">&#9888; Yes</td></tr>
+    <tr><td>capital-gain</td><td>0.2800</td>
+        <td class="td-warn">significant</td><td>0.0380</td><td>0.0420</td>
+        <td class="td-warn">&#9888; Yes</td></tr>
+    <tr><td>occupation</td><td>0.2200</td>
+        <td style="color:#EF9F27;font-weight:600">moderate</td><td>0.0550</td><td>0.0610</td>
+        <td class="td-ok">&#10003; No</td></tr>
+    <tr><td>hours-per-week</td><td>0.1700</td>
+        <td style="color:#EF9F27;font-weight:600">moderate</td><td>0.0610</td><td>0.0720</td>
+        <td class="td-ok">&#10003; No</td></tr>
+    <tr><td>education-num</td><td>0.0700</td>
+        <td class="td-ok">stable</td><td>0.1200</td><td>0.1850</td>
+        <td class="td-ok">&#10003; No</td></tr>
+    <tr><td>fnlwgt</td><td>0.0900</td>
+        <td class="td-ok">stable</td><td>0.0880</td><td>0.2100</td>
+        <td class="td-ok">&#10003; No</td></tr>
+    <tr><td>relationship</td><td>0.0500</td>
+        <td class="td-ok">stable</td><td>0.1900</td><td>0.3200</td>
+        <td class="td-ok">&#10003; No</td></tr>
+    <tr><td>marital-status</td><td>0.0400</td>
+        <td class="td-ok">stable</td><td>0.2100</td><td>0.4100</td>
+        <td class="td-ok">&#10003; No</td></tr>
+    <tr><td>sex</td><td>0.0300</td>
+        <td class="td-ok">stable</td><td>0.2300</td><td>0.5200</td>
+        <td class="td-ok">&#10003; No</td></tr>
+    <tr><td>native-country</td><td>0.0200</td>
+        <td class="td-ok">stable</td><td>0.4100</td><td>0.6300</td>
+        <td class="td-ok">&#10003; No</td></tr>
+  </table>
+</div>
+
+<footer>
+  Generated by <strong>MLens v0.2.0</strong> &nbsp;|&nbsp;
+  <a href="https://github.com/saiganesh47/mlens">github.com/saiganesh47/mlens</a>
+</footer>
+
+<script>
+const gridC  = 'rgba(255,255,255,0.07)';
+const tickC  = '#aaaaaa';
+const baseOpts = {
+  responsive:true,
+  maintainAspectRatio:false,
+  plugins:{legend:{display:false}},
+};
+
+/* SHAP */
+new Chart(document.getElementById('shapChart'),{
+  type:'bar',
+  data:{
+    labels:[
+      'native-country','sex','fnlwgt','marital-status','relationship',
+      'occupation','education-num','hours-per-week','capital-gain','age'
+    ],
+    datasets:[{
+      data:[0.02,0.04,0.05,0.07,0.08,0.09,0.10,0.12,0.15,0.18],
+      backgroundColor:[
+        '#CECBF6','#CECBF6','#AFA9EC','#AFA9EC','#7F77DD',
+        '#7F77DD','#7F77DD','#7F77DD','#534AB7','#534AB7'
+      ],
+      borderRadius:4, borderSkipped:false,
+    }]
+  },
+  options:{
+    ...baseOpts,
+    indexAxis:'y',
+    scales:{
+      x:{
+        grid:{color:gridC},
+        ticks:{color:tickC,font:{size:11}},
+        title:{display:true,text:'mean |SHAP value|',color:tickC,font:{size:11}}
+      },
+      y:{
+        grid:{display:false},
+        ticks:{color:'#e8e8e8',font:{size:11,family:'monospace'}}
+      },
+    }
+  }
+});
+
+/* Fairness */
+new Chart(document.getElementById('fairChart'),{
+  type:'bar',
+  data:{
+    labels:['Accuracy','Precision','Recall','F1'],
+    datasets:[
+      {label:'Male',   data:[0.87,0.82,0.79,0.80],
+       backgroundColor:'#534AB7', borderRadius:4},
+      {label:'Female', data:[0.81,0.70,0.65,0.67],
+       backgroundColor:'#1D9E75', borderRadius:4},
+    ]
+  },
+  options:{
+    ...baseOpts,
+    scales:{
+      x:{grid:{display:false},ticks:{color:tickC,font:{size:11}}},
+      y:{
+        min:0.5, max:1.0,
+        grid:{color:gridC},
+        ticks:{color:tickC,font:{size:10},callback:v=>v.toFixed(1)}
+      },
+    }
+  }
+});
+
+/* Drift */
+new Chart(document.getElementById('driftChart'),{
+  type:'bar',
+  data:{
+    labels:[
+      'age','capital-gain','occupation','hours-per-week','education-num',
+      'fnlwgt','relationship','marital-status','sex','native-country'
+    ],
+    datasets:[{
+      data:[0.31,0.28,0.22,0.17,0.07,0.09,0.05,0.04,0.03,0.02],
+      backgroundColor:[
+        '#E24B4A','#E24B4A','#EF9F27','#EF9F27',
+        '#639922','#639922','#639922','#639922','#639922','#639922'
+      ],
+      borderRadius:4, borderSkipped:false,
+    }]
+  },
+  options:{
+    ...baseOpts,
+    scales:{
+      x:{
+        grid:{display:false},
+        ticks:{color:tickC,font:{size:10},maxRotation:30,autoSkip:false}
+      },
+      y:{
+        grid:{color:gridC},
+        ticks:{color:tickC,font:{size:11}},
+        title:{display:true,text:'PSI',color:tickC,font:{size:11}}
+      },
+    }
+  }
+});
+</script>
+</body>
+</html>
