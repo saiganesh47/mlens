@@ -134,7 +134,7 @@ python examples/quickstart.py
 
 ---
 
-## 📁 Project Structure
+## 📁 Project structure 
 
 ```
 mlens/
@@ -230,7 +230,7 @@ Pull requests are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 
 ## 📜 License
 
-MIT © 2026 [Your Name](https://github.com/yourusername)
+MIT © 2026 [Sai Ganesh](https://github.com/saiganesh47)
 
 ---
 
