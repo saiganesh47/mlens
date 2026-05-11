@@ -201,6 +201,21 @@ mlens/
 ├── setup.py                          🆕 v0.2.0
 ├── requirements.txt                  🆕 v0.2.0 (updated)
 └── .github/workflows/ci.yml          ✅ v0.1.0
+mlens/
+├── api/                          🆕 v0.3.0
+│   ├── main.py                   ← FastAPI app
+│   ├── routes/
+│   │   ├── audit.py              ← POST /audit endpoint
+│   │   └── health.py             ← GET /health endpoint
+│   └── schemas/
+│       └── request.py            ← Pydantic models
+├── docker/                       🆕 v0.3.0
+│   ├── Dockerfile
+│   └── docker-compose.yml
+├── .github/workflows/
+│   ├── ci.yml                    ✅ existing
+│   └── docker-publish.yml        🆕 v0.3.0
+└── README.md                     ← update with API docs
 ```
 ---
 
