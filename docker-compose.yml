@@ -1,0 +1,58 @@
+# ── MLens — docker-compose.yml ─────────────────────────────────────────────
+#
+# Start everything:
+#   docker-compose up --build
+#
+# Services:
+#   mlens-api       → FastAPI on http://localhost:8000
+#   mlens-dashboard → Streamlit on http://localhost:8501
+
+version: "3.9"
+
+services:
+
+  # ── FastAPI REST API ──────────────────────────────────────────────────────
+  mlens-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: mlens-api
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ../mlens:/app/mlens:ro
+      - ../api:/app/api:ro
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # ── Streamlit Dashboard ───────────────────────────────────────────────────
+  mlens-dashboard:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dashboard
+    container_name: mlens-dashboard
+    ports:
+      - "8501:8501"
+    environment:
+      - PYTHONPATH=/app
+      - MLENS_API_URL=http://mlens-api:8000
+    volumes:
+      - ../mlens:/app/mlens:ro
+      - ../dashboard:/app/dashboard:ro
+      - ../docs:/app/docs:ro
+    depends_on:
+      mlens-api:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  default:
+    name: mlens-network
