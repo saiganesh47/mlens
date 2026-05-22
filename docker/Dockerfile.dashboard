@@ -1,0 +1,100 @@
+# .github/workflows/docker-publish.yml
+name: Docker Publish
+
+on:
+  push:
+    branches: [main]
+    tags:     ["v*.*.*"]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY:   ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check if Dockerfiles exist
+        id: check_files
+        run: |
+          if [ -f "./docker/Dockerfile" ]; then
+            echo "api_exists=true" >> $GITHUB_OUTPUT
+            echo "✅ docker/Dockerfile found"
+          else
+            echo "api_exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ docker/Dockerfile NOT found - skipping build"
+            ls -la
+          fi
+          if [ -f "./docker/Dockerfile.dashboard" ]; then
+            echo "dash_exists=true" >> $GITHUB_OUTPUT
+            echo "✅ docker/Dockerfile.dashboard found"
+          else
+            echo "dash_exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ docker/Dockerfile.dashboard NOT found - skipping build"
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.check_files.outputs.api_exists == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: |
+          steps.check_files.outputs.api_exists == 'true' &&
+          github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        if: steps.check_files.outputs.api_exists == 'true'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Build and push API image
+        if: steps.check_files.outputs.api_exists == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context:    .
+          file:       ./docker/Dockerfile
+          push:       ${{ github.event_name != 'pull_request' }}
+          tags:       ${{ steps.meta.outputs.tags }}
+          labels:     ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
+
+      - name: Build and push Dashboard image
+        if: steps.check_files.outputs.dash_exists == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context:    .
+          file:       ./docker/Dockerfile.dashboard
+          push:       ${{ github.event_name != 'pull_request' }}
+          tags:       ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-dashboard:latest
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
+
+      - name: Summary
+        run: |
+          echo "### Docker Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- API Image: ${{ steps.check_files.outputs.api_exists == 'true' && '✅ Built' || '⚠️ Skipped (Dockerfile missing)' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Dashboard: ${{ steps.check_files.outputs.dash_exists == 'true' && '✅ Built' || '⚠️ Skipped (Dockerfile missing)' }}" >> $GITHUB_STEP_SUMMARY
