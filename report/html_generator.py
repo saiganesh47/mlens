@@ -125,7 +125,7 @@ class ReportGenerator:
                      "line": {"color": "#E24B4A", "dash": "dash", "width": 1.5}},
                 ],
                 "margin": {"l": 20, "r": 20, "t": 50, "b": 80},
-                "height": 380,
+                "height": 400,
             },
         }
         return json.dumps(chart)
