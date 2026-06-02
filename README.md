@@ -217,6 +217,23 @@ mlens/
 │   └── docker-publish.yml        🆕 v0.3.0
 └── README.md                     ← update with API docs
 ```
+```
+mlens/
+├── explainability/
+│   ├── shap_analyzer.py        ✅ existing
+│   └── pytorch_explainer.py    🆕 v0.4.0 ← Native PyTorch SHAP
+├── drift/
+│   ├── drift_detector.py       ✅ existing  
+│   └── concept_drift.py        🆕 v0.4.0 ← ADWIN + Page-Hinkley
+├── integrations/               🆕 v0.4.0
+│   ├── mlflow_tracker.py       ← Log audits to MLflow
+│   └── wandb_tracker.py        ← Log audits to W&B
+├── notebooks/                  🆕 v0.4.0
+│   └── mlens_tutorial.ipynb    ← Full Jupyter tutorial
+└── tests/
+    ├── test_pytorch.py         🆕 v0.4.0
+    └── test_concept_drift.py   🆕 v0.4.0
+```
 ---
 
 ## 🧪 Running Tests
