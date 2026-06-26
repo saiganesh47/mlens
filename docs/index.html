@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MLens — Explainable ML Audit Tool</title>
+<meta name="description" content="Drop in any ML model. Get SHAP explainability, fairness audits, and drift detection in seconds."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:        #14141f;
+  --bg-raised: #1c1c2e;
+  --bg-card:   #1a1a2a;
+  --border:    #2c2c42;
+  --purple:    #8b80f0;
+  --purple-d:  #5d52c9;
+  --teal:      #2dd4a8;
+  --red:       #f0625f;
+  --amber:     #f0a847;
+  --ink:       #ece9f7;
+  --ink-dim:   #9694b3;
+  --mono:      'IBM Plex Mono', monospace;
+  --display:   'Space Grotesk', sans-serif;
+  --body:      'Inter', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--body);
+  line-height:1.6;overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+
+.scanline{
+  position:fixed;top:0;left:0;width:100%;height:2px;
+  background:linear-gradient(90deg,transparent,var(--purple),var(--teal),transparent);
+  opacity:0.6;z-index:50;animation:scan 6s linear infinite;
+}
+@keyframes scan{0%{transform:translateY(0)}100%{transform:translateY(100vh)}}
+@media (prefers-reduced-motion:reduce){.scanline{animation:none;display:none}}
+
+nav{
+  position:sticky;top:0;z-index:40;background:rgba(20,20,31,0.85);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--border);
+}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-family:var(--display);font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px}
+.logo .dot{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+.navlinks{display:flex;gap:28px;font-size:14px;color:var(--ink-dim)}
+.navlinks a:hover{color:var(--ink)}
+.gh-btn{
+  border:1px solid var(--border);padding:8px 16px;border-radius:8px;
+  font-size:13px;font-family:var(--mono);transition:border-color .2s;
+}
+.gh-btn:hover{border-color:var(--purple)}
+
+header.hero{padding:96px 0 72px;position:relative}
+.eyebrow{
+  font-family:var(--mono);font-size:12px;letter-spacing:0.12em;
+  color:var(--teal);text-transform:uppercase;margin-bottom:20px;
+  display:flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:'';width:24px;height:1px;background:var(--teal)}
+h1.title{
+  font-family:var(--display);font-size:clamp(36px,6vw,64px);font-weight:700;
+  line-height:1.05;letter-spacing:-0.02em;max-width:780px;margin-bottom:24px;
+}
+h1.title .accent{color:var(--purple)}
+p.lede{font-size:18px;color:var(--ink-dim);max-width:540px;margin-bottom:36px}
+.cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:56px}
+.btn{
+  font-family:var(--mono);font-size:13px;padding:13px 22px;border-radius:8px;
+  display:inline-flex;align-items:center;gap:8px;transition:all .2s;
+}
+.btn-primary{background:var(--purple);color:#0d0d16;font-weight:600}
+.btn-primary:hover{background:#a39af2}
+.btn-ghost{border:1px solid var(--border);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--purple);color:var(--purple)}
+
+.term{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:10px;
+  font-family:var(--mono);font-size:13px;overflow:hidden;max-width:640px;
+}
+.term-bar{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border)}
+.term-bar span{width:10px;height:10px;border-radius:50%;background:var(--border)}
+.term-body{padding:18px 20px;color:var(--ink-dim)}
+.term-body .prompt{color:var(--teal)}
+.term-body .cmd{color:var(--ink)}
+.term-body .out{color:var(--ink-dim);display:block;margin:4px 0}
+.term-body .warn{color:var(--amber)}
+
+.stats{border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:32px 0}
+.stats .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center}
+.stat-n{font-family:var(--display);font-size:28px;font-weight:700;color:var(--purple)}
+.stat-l{font-size:12px;color:var(--ink-dim);font-family:var(--mono);margin-top:4px}
+
+section{padding:88px 0}
+.sec-eyebrow{font-family:var(--mono);font-size:12px;color:var(--ink-dim);margin-bottom:10px}
+.sec-eyebrow b{color:var(--teal)}
+h2.sec-title{
+  font-family:var(--display);font-size:clamp(26px,4vw,38px);font-weight:600;
+  margin-bottom:48px;max-width:600px;
+}
+
+.modules{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.module{background:var(--bg-card);padding:32px 28px;transition:background .2s}
+.module:hover{background:var(--bg-raised)}
+.module .icon{font-size:22px;margin-bottom:18px;display:block}
+.module h3{font-family:var(--display);font-size:18px;margin-bottom:10px}
+.module p{font-size:14px;color:var(--ink-dim);margin-bottom:16px}
+.module code{font-family:var(--mono);font-size:11px;color:var(--purple);background:rgba(139,128,240,0.08);padding:2px 7px;border-radius:5px}
+
+.codeblock{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:10px;
+  padding:24px 26px;font-family:var(--mono);font-size:13px;line-height:1.8;
+  overflow-x:auto;color:var(--ink-dim);white-space:pre;
+}
+.codeblock .kw{color:var(--purple)}
+.codeblock .str{color:var(--teal)}
+.codeblock .com{color:#6b6885}
+
+.flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin-top:40px}
+.flow-step{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:10px;
+  padding:16px 20px;font-family:var(--mono);font-size:13px;text-align:center;min-width:140px;
+}
+.flow-step .n{color:var(--teal);font-size:11px;display:block;margin-bottom:4px}
+.flow-arrow{color:var(--ink-dim);padding:0 14px;font-size:18px}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.split ul{list-style:none}
+.split li{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--ink-dim)}
+.split li b{color:var(--ink);min-width:160px;font-family:var(--mono);font-size:12px}
+
+footer{border-top:1px solid var(--border);padding:48px 0;text-align:center}
+footer .gh{font-family:var(--mono);color:var(--purple);font-size:14px}
+footer p{color:var(--ink-dim);font-size:13px;margin-top:12px}
+
+@media (max-width:760px){
+  .modules{grid-template-columns:1fr}
+  .stats .wrap{grid-template-columns:repeat(2,1fr)}
+  .split{grid-template-columns:1fr}
+  .navlinks{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="scanline" aria-hidden="true"></div>
+
+<nav>
+  <div class="wrap">
+    <div class="logo"><span class="dot"></span> MLens</div>
+    <div class="navlinks">
+      <a href="#modules">Modules</a>
+      <a href="#install">Install</a>
+      <a href="#cli">CLI</a>
+      <a href="#architecture">Architecture</a>
+    </div>
+    <a class="gh-btn" href="https://github.com/saiganesh47/mlens" target="_blank">⭐ GitHub</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">v0.4.0 · explainable ml audit tool</div>
+    <h1 class="title">Your model makes decisions. <span class="accent">MLens</span> tells you why — and who it might be failing.</h1>
+    <p class="lede">Drop in any sklearn, XGBoost, or PyTorch model. Get SHAP explainability, fairness audits, and drift detection — before your regulator asks for them.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#install">Get started →</a>
+      <a class="btn btn-ghost" href="https://github.com/saiganesh47/mlens" target="_blank">View source</a>
+    </div>
+
+    <div class="term">
+      <div class="term-bar"><span></span><span></span><span></span></div>
+      <div class="term-body">
+        <span><span class="prompt">$</span> <span class="cmd">mlens audit model.pkl X_test.csv y_test.csv --sensitive gender.csv</span></span>
+        <span class="out">→ Loading model … ✓ GradientBoostingClassifier</span>
+        <span class="out">→ Running SHAP, fairness, drift …</span>
+        <span class="warn">⚠ Demographic parity gap 0.142 exceeds threshold 0.10</span>
+        <span class="out">✓ Report saved → mlens_report.html (4.31s)</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="wrap">
+    <div><div class="stat-n">3</div><div class="stat-l">audit modules</div></div>
+    <div><div class="stat-n">10+</div><div class="stat-l">model types</div></div>
+    <div><div class="stat-n">0.4.0</div><div class="stat-l">current release</div></div>
+    <div><div class="stat-n">MIT</div><div class="stat-l">license</div></div>
+  </div>
+</div>
+
+<section id="modules">
+  <div class="wrap">
+    <div class="sec-eyebrow"><b>01</b> · what it checks</div>
+    <h2 class="sec-title">Three questions every production model needs answered.</h2>
+    <div class="modules">
+      <div class="module">
+        <span class="icon">🧠</span>
+        <h3>Explainability</h3>
+        <p>Auto-selects TreeExplainer, LinearExplainer, or KernelExplainer. Global importance and per-prediction breakdowns.</p>
+        <code>ShapAnalyzer</code>
+      </div>
+      <div class="module">
+        <span class="icon">⚖️</span>
+        <h3>Fairness</h3>
+        <p>Demographic parity, equalized odds, and disparate impact against the EEOC 4/5ths rule — across any protected attribute.</p>
+        <code>FairnessEvaluator</code>
+      </div>
+      <div class="module">
+        <span class="icon">📊</span>
+        <h3>Drift</h3>
+        <p>PSI and KS-test per feature, plus ADWIN and Page-Hinkley for concept drift on live prediction streams.</p>
+        <code>DriftDetector</code>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <div class="sec-eyebrow"><b>02</b> · setup</div>
+    <h2 class="sec-title">Three lines from install to insight.</h2>
+    <div class="codeblock"><span class="com"># install</span>
+pip install -r requirements.txt
+
+<span class="com"># audit any trained model</span>
+<span class="kw">from</span> mlens <span class="kw">import</span> ModelAuditor
+
+auditor = ModelAuditor(model, X_train, X_test, y_test,
+                        sensitive_features=df_test[<span class="str">"gender"</span>])
+report = auditor.run()
+report.save(<span class="str">"audit_report.html"</span>)</div>
+  </div>
+</section>
+
+<section id="cli">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <div class="sec-eyebrow"><b>03</b> · interfaces</div>
+        <h2 class="sec-title">Use it however your team works.</h2>
+        <ul>
+          <li><b>CLI</b> mlens audit model.pkl X_test.csv y_test.csv</li>
+          <li><b>Python API</b> ModelAuditor(model, …).run()</li>
+          <li><b>Dashboard</b> streamlit run dashboard/app.py</li>
+          <li><b>REST API</b> POST /audit via FastAPI + Docker</li>
+          <li><b>MLflow / W&amp;B</b> log every audit as a tracked run</li>
+        </ul>
+      </div>
+      <div>
+        <div class="codeblock"><span class="com"># start the live dashboard</span>
+streamlit run dashboard/app.py
+
+<span class="com"># or run it as a service</span>
+docker-compose -f docker/docker-compose.yml up
+
+<span class="com"># API docs at</span>
+<span class="str">http://localhost:8000/docs</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="architecture">
+  <div class="wrap">
+    <div class="sec-eyebrow"><b>04</b> · how it fits together</div>
+    <h2 class="sec-title">One orchestrator, three independent modules.</h2>
+    <div class="flow">
+      <div class="flow-step"><span class="n">input</span>trained model<br/>+ data</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="n">core</span>ModelAuditor<br/>.run()</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="n">output</span>AuditReport<br/>.save()</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="gh">github.com/saiganesh47/mlens</div>
+    <p>MLens is MIT-licensed and built in the open. Contributions welcome.</p>
+  </div>
+</footer>
+
+</body>
+</html>
