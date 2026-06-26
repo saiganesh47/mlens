@@ -234,6 +234,19 @@ mlens/
     ├── test_pytorch.py         🆕 v0.4.0
     └── test_concept_drift.py   🆕 v0.4.0
 ```
+```
+mlens/
+├── docs/
+│   ├── index.html              🆕 GitHub Pages landing site (dark, custom design)
+│   ├── getting-started.md      🆕 5-minute quickstart
+│   ├── cli-reference.md        🆕 Every CLI flag documented
+│   ├── api-reference.md        🆕 Full Python API docs
+│   ├── fairness-guide.md       🆕 Explains DP gap, EO gap, disparate impact
+│   ├── changelog.md            🆕 v0.1.0 → v0.4.0 history
+│   └── _config.yml             🆕 GitHub Pages config
+└── notebooks/
+    └── mlens_tutorial.ipynb    🆕 Full interactive walkthrough
+```
 ---
 
 ## 🧪 Running Tests
