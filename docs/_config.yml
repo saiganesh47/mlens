@@ -1,0 +1,5 @@
+# docs/_config.yml
+# Tells GitHub Pages to serve docs/index.html as-is (no Jekyll processing needed,
+# but this file ensures GitHub Pages builds correctly from the /docs folder)
+theme: null
+plugins: []
