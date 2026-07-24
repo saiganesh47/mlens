@@ -247,6 +247,23 @@ mlens/
 └── notebooks/
     └── mlens_tutorial.ipynb    🆕 Full interactive walkthrough
 ```
+```
+mlens/
+├── comparison/                   🆕 Compare N models side-by-side
+│   ├── __init__.py
+│   ├── model_comparator.py       ← runs audit on each model, ranks them
+│   └── comparison_report.py      ← interactive side-by-side HTML report
+├── batch/                        🆕 Audit 100s of models in parallel
+│   ├── __init__.py
+│   ├── batch_auditor.py          ← ThreadPoolExecutor parallel auditing
+│   └── batch_report.py           ← master summary HTML + CSV
+├── monitoring/                   🆕 Alerts when drift/fairness fires
+│   ├── __init__.py
+│   └── alert_manager.py          ← Slack webhook + SMTP email alerts
+└── tests/
+    ├── test_comparator.py         🆕 12 tests
+    └── test_batch.py              🆕 11 tests
+
 ---
 
 ## 🧪 Running Tests
