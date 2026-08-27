@@ -264,6 +264,7 @@ mlens/
     ├── test_comparator.py         🆕 12 tests
     └── test_batch.py              🆕 11 tests
 ```
+```
 mlens/
 ├── automl/                        🆕 v0.7.0
 │   ├── model_recommender.py       ← suggest better models based on audit
