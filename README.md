@@ -263,6 +263,19 @@ mlens/
 └── tests/
     ├── test_comparator.py         🆕 12 tests
     └── test_batch.py              🆕 11 tests
+```
+mlens/
+├── automl/                        🆕 v0.7.0
+│   ├── model_recommender.py       ← suggest better models based on audit
+│   ├── hyperparameter_tuner.py    ← auto-tune for fairness + accuracy
+│   └── auto_report.py             ← plain-English action plan report
+├── recommendations/               🆕 v0.7.0
+│   ├── fairness_advisor.py        ← recommend fairness fixes
+│   ├── drift_advisor.py           ← recommend retraining schedule
+│   └── shap_advisor.py            ← feature engineering suggestions
+└── tests/
+    ├── test_recommender.py        🆕
+    └── test_advisors.py           🆕
 
 ---
 
