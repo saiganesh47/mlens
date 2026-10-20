@@ -277,7 +277,25 @@ mlens/
 └── tests/
     ├── test_recommender.py        🆕
     └── test_advisors.py           🆕
+```
+```
+mlens/
+├── monitoring/
+│   ├── alert_manager.py      ✅ existing
+│   ├── realtime_monitor.py   🆕 rolling window monitor + ADWIN
+│   ├── scheduler.py          🆕 cron-based periodic audits
+│   └── __init__.py           🆕 updated exports
+├── dashboard/
+│   ├── app.py                ✅ existing
+│   └── realtime_dashboard.py 🆕 live Streamlit charts
+├── api/routes/
+│   └── monitor.py            🆕 POST /ingest, GET /status, /history
+└── tests/
+    ├── test_monitor.py       🆕 11 tests
+    └── test_scheduler.py     🆕 9 tests
 
+
+```
 ---
 
 ## 🧪 Running Tests
