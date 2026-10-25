@@ -17,7 +17,7 @@ Usage
 >>> result.top_features(n=10)
 """
 
-from __future__ import annotations
+from __future__ import annotations 
 
 import warnings
 from dataclasses import dataclass, field
